@@ -18,8 +18,8 @@ const fetchMyIP = function(callback) {
       callback(error, null);
       //return IP address as string, or null if error
     } else {
-      if (data) {
-        callback(null, data);
+      if (body) {
+        callback(null, body);
       }
     }
   });
