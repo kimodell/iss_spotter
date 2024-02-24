@@ -16,11 +16,19 @@ const fetchMyIP = function(callback) {
     //return an error, if any
     if (error) {
       callback(error, null);
-      //return IP address as string, or null if error
-    } else {
-      if (body) {
-        callback(null, body);
-      }
+      return;
+    }
+
+    //if response is non-200 status code, assume server error
+    if (response.statusCode !== 200) {
+      const msg = `Status Code ${response.statusCode} when fetching IP. Reponse ${body}`;
+      callback(Error(msg), null);
+      return;
+    }
+
+    //return IP address as string, or null if error
+    if (body) {
+      callback(null, body);
     }
   });
 };
