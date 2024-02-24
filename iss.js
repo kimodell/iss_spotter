@@ -28,6 +28,8 @@ const fetchMyIP = function(callback) {
   });
 };
 
+//Makes a single API request to retrieve the lat/lng for a given IPv4 address.
+
 const fetchCoordsByIP = function(ip, callback) {
 
   request(`http://ipwho.is/${ip}`, (error, response, body) => {
@@ -36,7 +38,7 @@ const fetchCoordsByIP = function(ip, callback) {
       callback(error, null);
       return;
     }
-    
+
     //parse the body for us to use the information below
     const parsedBody = JSON.parse(body);
 
@@ -53,8 +55,33 @@ const fetchCoordsByIP = function(ip, callback) {
   });
 };
 
+// Makes a single API request to retrieve upcoming ISS fly over times the for the given lat/lng coordinates.
+
+const fetchISSFlyOverTimes = function(coords, callback) {
+
+  //declare url variable to take lat anf long coords from fetchCoordsByIP
+  const url = `https://iss-flyover.herokuapp.com/json/?lat=${coords.latitude}&lon=${coords.longitude}`;
+
+  request(url, (error, response, body) => {
+
+    if (error) {
+      callback(error, null);
+      return;
+    }
+    //if response is non-200 status code, assume server error, return error message
+    if (response.statusCode !== 200) {
+      callback(Error(`Status Code ${response.statusCode} when fetching ISS pass times: ${body}`), null);
+      return;
+    }
+
+    //if no errors, parse response data(response = {risetime, duration}) and return pass times as an array
+    const passes = JSON.parse(body).response;
+    callback(null, passes);
+  });
+};
 
 module.exports = {
   fetchMyIP,
   fetchCoordsByIP,
+  fetchISSFlyOverTimes
 };
