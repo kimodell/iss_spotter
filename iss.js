@@ -1,14 +1,8 @@
 //main fetch function
 const request = require('request');
 
-/**
- * Makes a single API request to retrieve the user's IP address.
- * Input:
- *   - A callback (to pass back an error or the IP string)
- * Returns (via Callback):
- *   - An error, if any (nullable)
- *   - The IP address as a string (null if error). Example: "162.245.144.188"
- */
+
+//Makes a single API request to retrieve the user's IP address.
 
 const fetchMyIP = function(callback) {
 
@@ -80,8 +74,36 @@ const fetchISSFlyOverTimes = function(coords, callback) {
   });
 };
 
+//Orchestrates multiple API requests in order to determine the next 5 upcoming ISS fly overs for the user's current location.
+//returns error if any, or flyover times as an array
+
+const nextISSTimesForMyLocation = function(callback) {
+  //first check if getting IP gives an error
+  fetchMyIP((error, ip) => {
+    if (error) {
+      return callback(error, null);
+    }
+    //then check if getting coordinates gives an error
+    fetchCoordsByIP(ip, (error, loc) => {
+      if (error) {
+        return callback(error, null);
+      }
+      //finally, check if getting pass times gives an error
+      fetchISSFlyOverTimes(loc, (error, nextPasses) => {
+        if (error) {
+          return callback(error, null);
+        }
+
+        //if no error, print passtimes five times
+        callback(null, nextPasses);
+      });
+    });
+  });
+};
+
 module.exports = {
   fetchMyIP,
   fetchCoordsByIP,
-  fetchISSFlyOverTimes
+  fetchISSFlyOverTimes,
+  nextISSTimesForMyLocation
 };
